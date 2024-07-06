@@ -3,6 +3,8 @@ import trello_api as trello
 import trello_action_handler as action_handlers
 import helpers as helpers
 
+BOARD_NAME = 'Tim 9'
+
 def get_trello_cards_df(board_id):
     cards = trello.get_trello_cards(board_id)
     df = pd.json_normalize(cards)
@@ -32,7 +34,7 @@ def write_prompt_to_file(prompt, filename):
     with open(filename, 'w') as f:
         f.write(prompt)
 
-board_id = trello.get_board_id('Tim 9')
+board_id = trello.get_board_id(BOARD_NAME)
 cards_df = get_trello_cards_df(board_id)
 actions_df = get_actions_df(cards_df)
 members_df = get_members_df(board_id)
