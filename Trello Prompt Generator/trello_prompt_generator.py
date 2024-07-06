@@ -61,8 +61,8 @@ history_df = action_handlers.generate_move_cards_df(actions_that_move_cards, mem
 consistancy_df = action_handlers.generate_action_consistancy_df(actions_for_specific_users_sorted, members_df)
 
 
-history_df.to_csv('history_df.csv', index=False)
-consistancy_df.to_csv('consistancy_df.csv', index=False)
+history_df.to_csv('generated_files/history_df.csv', index=False)
+consistancy_df.to_csv('generated_files/consistancy_df.csv', index=False)
 
 history_of_actions_prompt = action_handlers.generate_prompt_for_actions_that_move_cards(actions_that_move_cards, members_df, actions_for_specific_users_sorted)
 consistancy_of_actions_prompt = action_handlers.generate_prompt_for_action_consistancy_for_users(actions_for_specific_users_sorted, members_df)
@@ -79,7 +79,7 @@ Consistancy of actions:
 {consistancy_of_actions_prompt}
 """
 
-write_prompt_to_file(final_prompt, 'trello_prompt.txt')
+write_prompt_to_file(final_prompt, 'generated_files/trello_prompt.txt')
 
 
 
