@@ -3,3 +3,4 @@ Temp_Files
 .env
 __pycache__
 generated_files
+secrets.txt
