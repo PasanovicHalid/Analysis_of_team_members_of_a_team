@@ -15,9 +15,9 @@ def find_all_files(directory):
     return [f for f in os.listdir(directory) if isfile(join(directory, f))]
 
 def prompt():
-    chatgpt = ChatGPTAutomation(chrome_path, chrome_driver_path, r"https://chatgpt.com/g/g-GJGOsEZzs-teamwork-github-helper")
+    chatgpt = ChatGPTAutomation(chrome_path, chrome_driver_path, r"https://chatgpt.com/g/g-roxqZbzS3-teamwork-trello-helper")
 
-    files_root = "C:\\Users\\halid\\Desktop\\Master\\ChatGPT Selenium Chatter\\generated_files\\commit_consistancy"
+    files_root = "C:\\Users\\halid\\Desktop\\Master\\ChatGPT Selenium Chatter\\generated_files\\trello_actions"
 
     files = find_all_files(files_root)
 
@@ -25,14 +25,12 @@ def prompt():
         file_name = files_root + "\\" + files[i]
         chatgpt.send_file_to_chatgpt(file_name)
 
-        if i == len(files) - 1:
-            chatgpt.send_prompt_to_chatgpt("This is the overview of the commit history.")
-        else:
-            chatgpt.send_prompt_to_chatgpt("Analyse these commits.")
+        chatgpt.send_prompt_to_chatgpt("Find me positive and negative behaviors in these Trello card action history.")
+            
 
-    chatgpt.send_prompt_to_chatgpt("Sumarize everything about the commits.")
+    chatgpt.send_prompt_to_chatgpt("Please summarize all the provided Trello actions comprehensively")
 
-    chatgpt.save_conversation("commit_conversation.txt")
+    chatgpt.save_conversation("trello_conversation.txt")
 
     chatgpt.quit()
 

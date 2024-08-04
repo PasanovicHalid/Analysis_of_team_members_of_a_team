@@ -26,7 +26,8 @@ class ChatGPTAutomation:
 
         free_port = self.find_available_port()
         self.launch_chrome_with_remote_debugging(free_port, url)
-        self.wait_for_human_verification()
+        time.sleep(5)
+        #self.wait_for_human_verification()
         self.driver = self.setup_webdriver(free_port)
         self.cookie = self.get_cookie()
 
@@ -73,7 +74,7 @@ class ChatGPTAutomation:
         """ Sends a message to ChatGPT and waits for 20 seconds for the response """
 
         input_box = self.driver.find_element(by=By.XPATH, value='//textarea[contains(@id, "prompt-textarea")]')
-        self.driver.execute_script(f"arguments[0].value = '{prompt}';", input_box)
+        self.driver.execute_script(f"arguments[0].value = `{prompt}`;", input_box)
         input_box.send_keys(Keys.RETURN)
         input_box.submit()
         self.check_response_ended()
@@ -100,11 +101,11 @@ class ChatGPTAutomation:
         time.sleep(1)
         while len(self.driver.find_elements(by=By.CSS_SELECTOR, value='div.text-base')[-1].find_elements(
                 by=By.CSS_SELECTOR, value='button[data-testid="send-button"]')) < 1:
-            time.sleep(0.5)
+            time.sleep(2)
             # Exit the while loop after 60 seconds anyway
             if time.time() - start_time > 60:
                 break
-        time.sleep(1)  # the length should be =4, so it's better to wait a moment to be sure it's really finished
+        time.sleep(4)  # the length should be =4, so it's better to wait a moment to be sure it's really finished
 
     def return_chatgpt_conversation(self):
         """
@@ -172,4 +173,7 @@ class ChatGPTAutomation:
         """ Closes the browser and terminates the WebDriver session."""
         print("Closing the browser...")
         self.driver.close()
-        self.driver.quit()
+        try:
+            self.driver.quit()
+        except Exception as inst:
+            return

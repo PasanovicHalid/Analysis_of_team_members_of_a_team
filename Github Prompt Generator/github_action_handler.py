@@ -58,6 +58,7 @@ def generate_prompt_for_pull_request_handling(pull_df, comments_df, review_comme
     pull_prompts = []
     number_of_pull_requests_without_comments = 0
     number_of_pull_requests_that_are_quiclky_merged = 0
+    number_of_pull_requests_without_assignees = 0
 
     count_of_pull_request_for_each_user = pull_df['user.login'].value_counts()
     count_of_comments_and_review_comments_for_each_user = pd.concat([comments_df['user.login'].value_counts(), review_comments_df['user.login'].value_counts()], axis=1).sum(axis=1)
@@ -70,9 +71,14 @@ def generate_prompt_for_pull_request_handling(pull_df, comments_df, review_comme
         pull_prompt += f'Description: "{row["body"]}".\n'
         has_comments = False
         has_review_comments = False
+        has_assignees = True
 
         if row['created_at'] - row['merged_at'] < pd.Timedelta('5 minutes'):
             number_of_pull_requests_that_are_quiclky_merged += 1
+
+        if row['assignees'] == [] and row['requested_reviewers'] == [] and row['requested_teams'] == []:
+            has_assignees = False
+            number_of_pull_requests_without_assignees += 1
 
         if(comments_df.empty):
             pull_prompt += f'This pull request has no comments.\n'
@@ -102,11 +108,22 @@ def generate_prompt_for_pull_request_handling(pull_df, comments_df, review_comme
         else:
             pull_prompt += f'This pull request was not merged.\n'
 
+        if not has_assignees:
+            pull_prompt += f'This pull request has no assignees.\n'
+        else:
+            if row['assignees'] != None and row['assignees'] != []:
+                pull_prompt += f'This pull request has assignees: {", ".join([assignee["login"] for assignee in row["assignees"]])}.\n'
+            if row['requested_reviewers'] != None and row['requested_reviewers'] != []:
+                pull_prompt += f'This pull request has requested reviewers: {", ".join([reviewer["login"] for reviewer in row["requested_reviewers"]])}.\n'
+            if row['requested_teams'] != None and row['requested_teams'] != []:
+                pull_prompt += f'This pull request has requested teams: {", ".join([team["name"] for team in row["requested_teams"]])}.\n'
+
         if not has_comments and not has_review_comments:
             number_of_pull_requests_without_comments += 1
             continue
 
-        pull_prompts.append(pull_prompt)
+        pull_prompts.append(f"""{pull_prompt}\n
+{"-" * 50}""")
 
     prompts = []
 
@@ -129,6 +146,7 @@ def generate_prompt_for_pull_request_handling(pull_df, comments_df, review_comme
 Number of pull requests: {len(pull_df)}       
 Number of pull requests that are merged under 5 minutes: {number_of_pull_requests_that_are_quiclky_merged}
 Number of pull requests without comments: {number_of_pull_requests_without_comments}
+Number of pull requests without assignees: {number_of_pull_requests_without_assignees}
 {"\n".join(prompt_for_count_of_pull_request_for_each_user)}
 {"\n".join(prompt_for_comments)}
 """)  

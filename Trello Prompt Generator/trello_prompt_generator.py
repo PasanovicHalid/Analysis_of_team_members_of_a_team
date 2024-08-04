@@ -3,7 +3,7 @@ import trello_api as trello
 import trello_action_handler as action_handlers
 import helpers as helpers
 
-BOARD_NAME = 'Tim 9'
+BOARD_NAME = 'psw'
 
 def get_trello_cards_df(board_id):
     cards = trello.get_trello_cards(board_id)
@@ -31,10 +31,15 @@ def get_members_df(board_id):
     return df
 
 def write_prompt_to_file(prompt, filename):
-    with open(filename, 'w') as f:
+    with open(filename, 'w', encoding='utf-8') as f:
         f.write(prompt)
 
-board_id = trello.get_board_id(BOARD_NAME)
+def create_number_of_file_for_ordering(length_of_list, index):
+    order_of_10_expontents = len(str(length_of_list))
+
+    return str(index).zfill(order_of_10_expontents)
+
+board_id = "tHpvYHXl"
 cards_df = get_trello_cards_df(board_id)
 actions_df = get_actions_df(cards_df)
 members_df = get_members_df(board_id)
@@ -47,7 +52,10 @@ actions_with_cards = pd.merge(actions_df, cards_df[['id', 'name', 'idMembers']],
 
 actions_for_specific_users_sorted = actions_with_cards.groupby('memberCreator.id').apply(
     lambda x: sorted(list(zip(x['date'], x['id_action'])), key=lambda y: y[0])
+).reset_index(name='date_id_action_tuples')
 
+actions_for_cards = actions_with_cards.groupby('card_id').apply(
+    lambda x: sorted(list(zip(x['date'], x['id_action'])), key=lambda y: y[0])
 ).reset_index(name='date_id_action_tuples')
 
 #Get data where 
@@ -57,29 +65,19 @@ actions_that_move_cards = actions_that_move_cards.reset_index(drop=True)
 actions_that_update_cards = actions_with_cards[(actions_with_cards['type'] == 'updateCard') & (actions_with_cards['data.listAfter.id'] == None)]
 actions_that_update_cards = actions_that_update_cards.reset_index(drop=True)
 
-history_df = action_handlers.generate_move_cards_df(actions_that_move_cards, members_df, actions_for_specific_users_sorted)
-consistancy_df = action_handlers.generate_action_consistancy_df(actions_for_specific_users_sorted, members_df)
-
-
-history_df.to_csv('generated_files/history_df.csv', index=False)
-consistancy_df.to_csv('generated_files/consistancy_df.csv', index=False)
-
-history_of_actions_prompt = action_handlers.generate_prompt_for_actions_that_move_cards(actions_that_move_cards, members_df, actions_for_specific_users_sorted)
+history_of_actions_prompts = action_handlers.generate_prompt_for_actions_that_move_cards(actions_that_move_cards, members_df, actions_for_cards)
 consistancy_of_actions_prompt = action_handlers.generate_prompt_for_action_consistancy_for_users(actions_for_specific_users_sorted, members_df)
 
+for i in range(len(history_of_actions_prompts)):
+    write_prompt_to_file(history_of_actions_prompts[i], f'generated_files/trello_prompt_actions-{create_number_of_file_for_ordering(len(history_of_actions_prompts), i)}.txt')
+
 final_prompt = f"""
-This is the complete trello history of the team. It includes the history of actions that move cards and the consistancy of actions for each team member.
-
-History of actions that move cards:
-
-{history_of_actions_prompt}
-
 Consistancy of actions:
 
 {consistancy_of_actions_prompt}
 """
 
-write_prompt_to_file(final_prompt, 'generated_files/trello_prompt.txt')
+write_prompt_to_file(final_prompt, 'generated_files/trello_prompt_consistancy.txt')
 
 
 

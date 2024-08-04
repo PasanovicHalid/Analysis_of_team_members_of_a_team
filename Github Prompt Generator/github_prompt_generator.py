@@ -2,20 +2,26 @@ import pandas as pd
 import github_api as github
 import github_action_handler as action_handlers
 
-GITHUB_OWNER = 'Grupa-6-PSW'
-GITHUB_REPO = 'back-end'
+GITHUB_OWNER = 'RA2020PSW8'
+GITHUB_REPOS = ['tourism-api', 'tourism-webapp']
 
 def write_prompt_to_file(prompt, filename):
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(prompt)
 
 def get_commits_df():
-    github_commits = github.get_commits(GITHUB_OWNER, GITHUB_REPO)
+    github_commits = []
+    for GITHUB_REPO in GITHUB_REPOS:
+        github_commits_for_repo = github.get_commits(GITHUB_OWNER, GITHUB_REPO)
+        github_commits = github_commits + github_commits_for_repo
     df = pd.json_normalize(github_commits)
     return df
 
 def get_pull_requests_df():
-    github_pull_requests = github.get_pull_requests(GITHUB_OWNER, GITHUB_REPO)
+    github_pull_requests = []
+    for GITHUB_REPO in GITHUB_REPOS:
+        github_pull_requests_for_repo = github.get_pull_requests(GITHUB_OWNER, GITHUB_REPO)
+        github_pull_requests = github_pull_requests + github_pull_requests_for_repo
     df = pd.json_normalize(github_pull_requests)
     return df
 
