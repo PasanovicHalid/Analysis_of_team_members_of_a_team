@@ -2,8 +2,8 @@ import pandas as pd
 import github_api as github
 import github_action_handler as action_handlers
 
-GITHUB_OWNER = 'RA2020PSW8'
-GITHUB_REPOS = ['tourism-api', 'tourism-webapp']
+GITHUB_OWNER = 'Grupa-6-PSW'
+GITHUB_REPOS = ['front-end', 'back-end']
 
 def write_prompt_to_file(prompt, filename):
     with open(filename, 'w', encoding='utf-8') as f:

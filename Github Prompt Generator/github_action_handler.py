@@ -8,6 +8,7 @@ def generate_prompt_for_commit_consistancy(commits_df):
     merge_commit_pattern = re.compile(r'^(Merge (pull request|branch)|merge)', re.IGNORECASE)
 
     count_of_commits_for_each_user = commits_df['commit.author.name'].value_counts()
+    commit_sequence_numbers = []
 
     for i, row in commits_df.iterrows():
 
@@ -15,6 +16,8 @@ def generate_prompt_for_commit_consistancy(commits_df):
         # check if the commit message contains all possible merge messages
         if merge_commit_pattern.match(row['commit.message']):
             continue
+
+        commit_sequence_numbers.append(i + 1)
 
         commit_prompt = f'{i + 1}. Commit "{row["commit.message"]}" has been made by "{row["commit.author.name"]}" at "{row["commit.author.date"]}".\n'
         commit_prompts.append(commit_prompt)
@@ -24,7 +27,11 @@ def generate_prompt_for_commit_consistancy(commits_df):
     for i in range(0, len(commit_prompts), 50):
         prompt = f"""The following commits have been made:\n
 {'\n'.join(commit_prompts[i:i+50])}
+
+The following commits are in this batch:
+{', '.join([str(commit_number) for commit_number in commit_sequence_numbers[i:i+50]])}
     """
+    
         prompts.append(prompt)
 
     prompt_for_count = []
@@ -56,6 +63,7 @@ def generate_df_for_commit_consistancy(commits_df):
 # Describes who made the pull request, when it was made, and the comments made on it. when it was merged...
 def generate_prompt_for_pull_request_handling(pull_df, comments_df, review_comments_df):
     pull_prompts = []
+    pull_sequence_numbers = []
     number_of_pull_requests_without_comments = 0
     number_of_pull_requests_that_are_quiclky_merged = 0
     number_of_pull_requests_without_assignees = 0
@@ -66,8 +74,8 @@ def generate_prompt_for_pull_request_handling(pull_df, comments_df, review_comme
     pull_df['created_at'] = pd.to_datetime(pull_df['created_at'])
     pull_df['merged_at'] = pd.to_datetime(pull_df['merged_at'])
 
-    for _, row in pull_df.iterrows():
-        pull_prompt = f'Pull request "{row["title"]}" has been made by "{row["user.login"]}" at "{row["created_at"]}".\n'
+    for i, row in pull_df.iterrows():
+        pull_prompt = f'{i + 1}. Pull request "{row["title"]}" has been made by "{row["user.login"]}" at "{row["created_at"]}".\n'
         pull_prompt += f'Description: "{row["body"]}".\n'
         has_comments = False
         has_review_comments = False
@@ -100,7 +108,7 @@ def generate_prompt_for_pull_request_handling(pull_df, comments_df, review_comme
                 has_review_comments = True
 
             for _, review_comment in review_comments.iterrows():
-                pull_prompt += f'Review comment: "{review_comment["body"]}" by "{review_comment["user.login"]}" at "{review_comment["created_at"]}".\n'
+                pull_prompt += f'Review comment: "{review_comment["body"]}" by "{review_comment["user.login"]}" for file "{review_comment["path"]}" for code "{review_comment["diff_hunk"]}" at "{review_comment["created_at"]}".\n'
         
         if row['merged_at'] != None:
             pull_prompt += f'This pull request was merged at "{row["merged_at"]}".\n'
@@ -122,6 +130,7 @@ def generate_prompt_for_pull_request_handling(pull_df, comments_df, review_comme
             number_of_pull_requests_without_comments += 1
             continue
 
+        pull_sequence_numbers.append(i + 1)
         pull_prompts.append(f"""{pull_prompt}\n
 {"-" * 50}""")
 
@@ -130,6 +139,9 @@ def generate_prompt_for_pull_request_handling(pull_df, comments_df, review_comme
     for i in range(0, len(pull_prompts), 15):
         prompt = f"""Analyze the following pull requests have been made:\n
 {'\n'.join(pull_prompts[i:i+15])}
+
+The following pull requests are in this batch:
+{', '.join([str(pull_number) for pull_number in pull_sequence_numbers[i:i+15]])}
     """
         prompts.append(prompt)
 

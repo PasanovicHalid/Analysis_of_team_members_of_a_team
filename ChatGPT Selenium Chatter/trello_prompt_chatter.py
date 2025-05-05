@@ -25,7 +25,7 @@ def prompt():
         file_name = files_root + "\\" + files[i]
         chatgpt.send_file_to_chatgpt(file_name)
 
-        chatgpt.send_prompt_to_chatgpt("Find me positive and negative behaviors in these Trello card action history.")
+        chatgpt.send_prompt_to_chatgpt("Find me positive and negative behaviors in these Trello card action history. Give recommendations for improvement")
             
 
     chatgpt.send_prompt_to_chatgpt("Please summarize all the provided Trello actions comprehensively")
@@ -33,6 +33,6 @@ def prompt():
     chatgpt.save_conversation("trello_conversation.txt")
 
     chatgpt.quit()
-
+ 
 if __name__ == "__main__":
     prompt()

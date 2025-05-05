@@ -22,6 +22,8 @@ def prompt():
 
     files = find_all_files(files_root)
 
+    chatgpt.send_prompt_to_chatgpt("Now you will be provided with batches of pull requests. Analyze the batch of pull requests.")
+
     for i in range(len(files)):
         file_name = files_root + "\\" + files[i]
         chatgpt.send_file_to_chatgpt(file_name)

@@ -69,7 +69,7 @@ history_of_actions_prompts = action_handlers.generate_prompt_for_actions_that_mo
 consistancy_of_actions_prompt = action_handlers.generate_prompt_for_action_consistancy_for_users(actions_for_specific_users_sorted, members_df)
 
 for i in range(len(history_of_actions_prompts)):
-    write_prompt_to_file(history_of_actions_prompts[i], f'generated_files/trello_prompt_actions-{create_number_of_file_for_ordering(len(history_of_actions_prompts), i)}.txt')
+    write_prompt_to_file(history_of_actions_prompts[i], f'generated_files/trello_prompt_actions-{create_number_of_file_for_ordering(len(history_of_actions_prompts), i + 1)}.txt')
 
 final_prompt = f"""
 Consistancy of actions:

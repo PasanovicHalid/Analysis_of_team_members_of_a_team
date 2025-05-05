@@ -102,8 +102,8 @@ class ChatGPTAutomation:
         while len(self.driver.find_elements(by=By.CSS_SELECTOR, value='div.text-base')[-1].find_elements(
                 by=By.CSS_SELECTOR, value='button[data-testid="send-button"]')) < 1:
             time.sleep(2)
-            # Exit the while loop after 60 seconds anyway
-            if time.time() - start_time > 60:
+            # Exit the while loop after 360 seconds anyway
+            if time.time() - start_time > 360:
                 break
         time.sleep(4)  # the length should be =4, so it's better to wait a moment to be sure it's really finished
 

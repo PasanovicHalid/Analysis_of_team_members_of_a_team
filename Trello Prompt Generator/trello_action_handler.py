@@ -131,13 +131,13 @@ def generate_prompt_for_actions_that_move_cards(actions_that_move_cards_pd, memb
 
         for i in range(len(card['actions'])):
             if i == 0:
-                time_diff = pd.Timedelta(seconds=0)
+                prompt += f'Card created in List: "{card["actions"][i]["list_after"]}".'
             else:
                 time_diff = _get_difference_in_time_between_actions_for_specified_actions(actions_for_cards, cardId, card['actions'][i-1]['action_id'], card['actions'][i]['action_id'])
+                prompt += f'Card moved from List: "{card["actions"][i-1]["list_after"]}" to List: "{card["actions"][i]["list_after"]}".' 
+                if time_diff.total_seconds() != 0:
+                    prompt += f'Time to perform this action: "{_time_to_string(time_diff)}".'
 
-            prompt += f'Card moved from "{card["actions"][i-1]["list_after"]}" to "{card["actions"][i]["list_after"]}".' 
-            if time_diff.total_seconds() != 0:
-                prompt += f'Time to perform this action: "{_time_to_string(time_diff)}".'
             prompt += '\n'
 
         action_prompts.append(f"""{prompt}
